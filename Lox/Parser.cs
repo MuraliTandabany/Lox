@@ -74,12 +74,12 @@ public sealed class Parser
 
 	private Statement ParseReturnStatement()
 	{
-		Previous();
+		var keyword = Previous();
 		Expression? value = null;
 		if (!Check(TokenType.Semicolon))
 			value = ParseExpression();
 		Consume(TokenType.Semicolon, "Expect ';' after return value");
-		return new Statement.ReturnStatement(value);
+		return new Statement.ReturnStatement(value, keyword);
 	}
 
 	private Statement ParseForStatement()

@@ -85,9 +85,15 @@ public abstract class Statement
 
 	public sealed class ReturnStatement : Statement
 	{
-		public ReturnStatement(Expression? value) => this.value = value;
+		public ReturnStatement(Expression? value, Token keyword)
+		{
+			this.value = value;
+			this.keyword = keyword;
+		}
+
 		public override T Accept<T>(StatementVisitor<T> statementVisitor) => statementVisitor.VisitReturnStatement(this);
 		public readonly Expression? value;
+		public readonly Token keyword;
 	}
 }
 

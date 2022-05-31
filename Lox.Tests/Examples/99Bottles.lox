@@ -4,7 +4,7 @@ var secondLine = "";
 var bottlesString = "bottles";
 fun print99Bottles()
 {
-	while( bottlesCount >= 0)
+	while (bottlesCount >= 0)
 	{
 		if(bottlesCount == 0)
 		{
@@ -13,7 +13,7 @@ fun print99Bottles()
 
 			print firstLine;
 			print secondLine;
-			return ;
+			return;
 		}
 		if(bottlesCount == 1)
 		{

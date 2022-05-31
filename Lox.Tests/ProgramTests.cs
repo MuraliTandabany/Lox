@@ -33,6 +33,7 @@ public sealed class ProgramTests
 	}
 
 	[Test]
+	[Category("Slow")]
 	public void PrintFibonacciNumbersWithRecursion()
 	{
 		var stringWriter = new StringWriter();

@@ -26,6 +26,8 @@ public sealed class Program
 	private static void Run(string code, string filePath = "")
 	{
 		var statements = new Parser(new Scanner(code, filePath).Tokens).Parse();
+		var resolver = new Resolver(Interpreter);
+		resolver.Resolve(statements);
 		Interpreter.Interpret(statements);
 	}
 

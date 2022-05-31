@@ -6,6 +6,7 @@ namespace Lox;
 public sealed class Interpreter : ExpressionVisitor<object>, StatementVisitor<object>
 {
 	public Environment environment = new();
+	private readonly Dictionary<Expression, int> locals = new();
 
 	public void Interpret(List<Statement> statements)
 	{
@@ -161,12 +162,24 @@ public sealed class Interpreter : ExpressionVisitor<object>, StatementVisitor<ob
 	public object VisitAssignmentExpression(Expression.AssignmentExpression assignmentExpression)
 	{
 		var value = EvaluateExpression(assignmentExpression.value);
-		environment.Assign(assignmentExpression.name, value);
+		var distance = locals[assignmentExpression];
+		if (distance >= 0)
+			environment.AssignAt(distance, assignmentExpression.name, assignmentExpression.value);
+		else
+			environment.Assign(assignmentExpression.name, value);
 		return value;
 	}
 
 	public object VisitVariableExpression(Expression.VariableExpression variableExpression) =>
-		environment.Get(variableExpression.name);
+		LookupVariable(variableExpression.name, variableExpression);
+
+	private object LookupVariable(Token name, Expression expression)
+	{
+		var distance = locals[expression];
+		if (distance >= 0)
+			return environment.GetAt(distance, name.Lexeme);
+		return environment.Get(name);
+	}
 
 	public object VisitLogicalExpression(Expression.LogicalExpression logicalExpression)
 	{
@@ -299,6 +312,8 @@ public sealed class Interpreter : ExpressionVisitor<object>, StatementVisitor<ob
 		public readonly object? value;
 		public Return(object? value) => this.value = value;
 	}
+
+	public void Resolve(Expression expression, int depth) => locals.Add(expression, depth);
 }
 
 public interface Callable
