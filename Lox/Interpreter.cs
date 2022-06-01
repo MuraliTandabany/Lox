@@ -5,8 +5,15 @@ namespace Lox;
 // ReSharper disable once ClassTooBig
 public sealed class Interpreter : ExpressionVisitor<object>, StatementVisitor<object>
 {
-	public Environment environment = new();
+	public Interpreter()
+	{
+		Globals = new Environment();
+		environment = Globals;
+	}
+
+	private Environment environment;
 	private readonly Dictionary<Expression, int> locals = new();
+	public Environment Globals { get; }
 
 	public void Interpret(List<Statement> statements)
 	{
@@ -162,24 +169,22 @@ public sealed class Interpreter : ExpressionVisitor<object>, StatementVisitor<ob
 	public object VisitAssignmentExpression(Expression.AssignmentExpression assignmentExpression)
 	{
 		var value = EvaluateExpression(assignmentExpression.value);
-		var distance = locals[assignmentExpression];
-		if (distance >= 0)
-			environment.AssignAt(distance, assignmentExpression.name, assignmentExpression.value);
+		if (locals.TryGetValue(assignmentExpression, out var distance))
+			environment.AssignAt(distance, assignmentExpression.name, value);
 		else
-			environment.Assign(assignmentExpression.name, value);
+		{
+			Globals.Assign(assignmentExpression.name, value);
+		}
 		return value;
 	}
 
 	public object VisitVariableExpression(Expression.VariableExpression variableExpression) =>
 		LookupVariable(variableExpression.name, variableExpression);
 
-	private object LookupVariable(Token name, Expression expression)
-	{
-		var distance = locals[expression];
-		if (distance >= 0)
-			return environment.GetAt(distance, name.Lexeme);
-		return environment.Get(name);
-	}
+	private object LookupVariable(Token name, Expression expression) =>
+		locals.TryGetValue(expression, out var distance)
+			? environment.GetAt(distance, name.Lexeme)
+			: Globals.Get(name);
 
 	public object VisitLogicalExpression(Expression.LogicalExpression logicalExpression)
 	{
